@@ -147,7 +147,8 @@ class AVLNode(object):
     def balance_factor(self):
         return self.left.height - self.right.height
 
-    def create_leaf(self, key, value, parent):
+    @staticmethod
+    def create_leaf(key, value, parent):
         leaf = AVLNode(key, value)
         leaf.set_parent(parent)
         leaf.set_right(AVLNode(None, None))
@@ -231,8 +232,10 @@ class AVLTree(object):
         # if added leaf and has brother - no rotations needed
         prev: AVLNode = leaf.parent
         if prev.left.is_real_node() and not prev.right.is_real_node():
+            pass
 
         elif not prev.left.is_real_node() and prev.right.is_real_node():
+            pass
 
 
     def LL_rotate(self, node:AVLNode):
@@ -252,17 +255,19 @@ class AVLTree(object):
 
 
     def RL_roate(self, node: AVLNode):
-        # node.set_right(node.get_right().get_left())
-        # node.get_right().set_parent(node)
-        # node.get_right().set_right()
+        node.set_right(node.get_right().get_left())
+        node.get_right().set_parent(node)
+        node.get_right().set_right()
 
 
         self.LL_rotate(node)
 
     def RR_rotate(self, node):
+        pass
 
 
     def LR_rotate(self):
+        pass
 
 
 
