@@ -1,13 +1,20 @@
 from printree import printree
 from avl_template import AVLTree, AVLNode
 
+LL = [6,7,8]
+RL = [6,8,7]
+LR = [8,6,7]
+RR = [8,7,6]
+
 t = AVLTree()
-to_insert = [10,6,12,13,14]
-for x in to_insert:
+
+for x in RL:
     t.insert(x,0)
-printree(t.root)
-t.LL_rotate(t.root.get_right())
-printree(t.root)
-t.insert(7,0)
-printree(t.root)
+    printree(t.root)
+
+
+
+#to_insert = [6,8,7]
+
+
 
