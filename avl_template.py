@@ -238,7 +238,7 @@ class AVLTree(object):
             # prev.height hasnt been changed yet
             if abs(prev_bf) < 2 and not height_changed:  # 3.2
                 break
-            elif abs(prev_bf) <2 and height_changed:  # 3.3
+            elif abs(prev_bf) < 2 and height_changed:  # 3.3
                 parent.set_height(parent.get_height() + 1)
                 child = parent
                 parent = parent.get_parent()
@@ -251,8 +251,7 @@ class AVLTree(object):
                 # self.Update(node_to_update)
                 break
 
-
-    def rotate(self, prev:AVLNode, leaf :AVLNode):
+    def rotate(self, prev: AVLNode, leaf: AVLNode):
         node_to_update = None
         # determine which rotate is need (RR/RL/LL/LR) and do it
         grand = prev.get_parent()
@@ -263,7 +262,7 @@ class AVLTree(object):
                 node_to_update = self.RL_rotate(grand)
         elif prev.calc_bf() == -1:
             if grand.calc_bf() == 2:
-                node_to_update = self.LR_rotate(grand,leaf)
+                node_to_update = self.LR_rotate(grand, leaf)
             if grand.calc_bf() == -2:
                 node_to_update = self.LL_rotate(grand)
 
@@ -342,7 +341,7 @@ class AVLTree(object):
         temp = node.get_parent().get_right()
         node.get_parent().set_right(node)
         node.set_left(temp)
-        temp=None
+        temp = None
 
         if is_root:  # is root
             self.root = sentinel.get_left()
@@ -356,7 +355,7 @@ class AVLTree(object):
 
         return node.get_parent()
 
-    def LR_rotate(self, node: AVLNode, leaf :AVLNode):
+    def LR_rotate(self, node: AVLNode, leaf: AVLNode):
         sentinel = AVLNode(None, None)
         is_root = False
         if node.parent is None:  # is root
@@ -366,7 +365,7 @@ class AVLTree(object):
             node.set_parent(sentinel)
 
         node.set_left(node.get_left().get_right())
-        temp = node.get_left().get_left() if node.get_left().get_left() is not None else AVLNode(None,None)
+        temp = node.get_left().get_left() if node.get_left().get_left() is not None else AVLNode(None, None)
         node.get_left().set_left(node.get_left().get_parent())
         node.get_left().get_left().set_right(temp)
         temp.set_parent(node.get_left().get_left())
@@ -381,10 +380,9 @@ class AVLTree(object):
 
         print("LR rotate:")
         printree(self.root)
-        self.update(node.get_left().get_left()) #here
+        self.update(node.get_left().get_left())  # here
         printree(self.root)
         return self.RR_rotate(node)
-
 
     """deletes node from the dictionary
 
@@ -404,7 +402,15 @@ class AVLTree(object):
     """
 
     def avl_to_array(self):
-        return None
+        array: list = []
+        self.avl_to_array_rec(self.root, array)
+        return array
+
+    def avl_to_array_rec(self, node: AVLNode, array: list):
+        if node.is_real_node():
+            self.avl_to_array_rec(node.get_left(), array)
+            array.append((node.key, node.value))
+            self.avl_to_array_rec(node.get_right(), array)
 
     """returns the number of items in dictionary 
 

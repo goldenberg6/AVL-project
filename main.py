@@ -10,9 +10,11 @@ bigtree_with_LR = [15,10,22,4,11,20,24,2,7,12,18,1,6,8,5]
 
 t = AVLTree()
 
-for x in LL:
+for x in bigtree_with_LR:
     t.insert(x,0)
     printree(t.root)
+
+print(t.avl_to_array())
 
 
 
