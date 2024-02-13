@@ -293,6 +293,8 @@ class AVLTree(object):
                 node.get_parent().set_left(node.get_right())
             else:
                 node.get_parent().set_right(node.get_right())
+        else:
+            node.get_parent().set_right(node.get_right())
 
         node.get_right().set_parent(node.get_parent())
         temp = node.get_right().get_left()
@@ -359,6 +361,8 @@ class AVLTree(object):
                 node.get_parent().set_left(node.get_left())
             else:
                 node.get_parent().set_right(node.get_left())
+        else:
+            node.get_parent().set_left(node.get_left())
 
         node.get_left().set_parent(node.get_parent())
         temp = node.get_left().get_right()

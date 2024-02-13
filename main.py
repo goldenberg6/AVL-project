@@ -14,7 +14,7 @@ bigtree_with_LR2 = [15, 10, 25, 4, 11, 20, 26, 2, 18, 23, 27, 17, 22, 24, 21]
 
 t = AVLTree()
 
-for x in LL:
+for x in RR:
     t.insert(x,0)
     printree(t.root)
 
