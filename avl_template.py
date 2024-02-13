@@ -280,7 +280,7 @@ class AVLTree(object):
             node = node.parent
 
     def LL_rotate(self, node: AVLNode):
-        sentinel = AVLNode(None, None)
+        sentinel = AVLNode("sentinal", None)
         is_root = False
         if node.parent is None:  # is root
             is_root = True
@@ -288,11 +288,19 @@ class AVLTree(object):
             sentinel.set_left(AVLNode(None, None))
             node.set_parent(sentinel)
 
-        node.get_parent().set_right(node.right)
+        if is_root is False:
+            if(node.get_key() < node.get_parent().get_key()):
+                node.get_parent().set_left(node.get_right())
+            else:
+                node.get_parent().set_right(node.get_right())
+
         node.get_right().set_parent(node.get_parent())
+        temp = node.get_right().get_left()
         node.set_parent(node.get_right())
         node.right = AVLNode(None, None)
         node.get_parent().set_left(node)
+        node.set_right(temp)
+        temp = None
 
         if is_root:  # is root
             self.root = sentinel.get_right()
@@ -301,6 +309,8 @@ class AVLTree(object):
 
         # the only height that changes is node.left's
         node.set_height(node.get_parent().get_height() - 1)
+
+        self.update(node.get_parent().get_parent())
 
         return node.get_parent()
 
@@ -314,15 +324,24 @@ class AVLTree(object):
             node.set_parent(sentinel)
 
         node.set_right(node.get_right().get_left())
+        temp = node.get_right().get_right() if node.get_right().get_right() is not None else AVLNode(None,None)
         node.get_right().set_right(node.get_right().get_parent())
+        node.get_right().get_right().set_left(temp)
+        temp.set_parent(node.get_right().get_right())
         node.get_right().get_right().set_parent(node.get_right())
-        node.get_right().get_right().set_left(AVLNode(None, None))
+        temp = None
         node.get_right().set_parent(node)
 
         if is_root:  # is root
             self.root = sentinel.get_right()
             self.root.set_parent(None)
             sentinel.set_right(AVLNode(None, None))
+
+        print("RL rotate:")
+        printree(self.root)
+        self.update(node.get_right().get_right())  # here
+        printree(self.root)
+        return self.LL_rotate(node)
 
         return self.LL_rotate(node)
 
@@ -335,11 +354,16 @@ class AVLTree(object):
             sentinel.set_right(AVLNode(None, None))
             node.set_parent(sentinel)
 
-        node.get_parent().set_left(node.left)
+        if is_root is False:
+            if(node.get_key() < node.get_parent().get_key()):
+                node.get_parent().set_left(node.get_left())
+            else:
+                node.get_parent().set_right(node.get_left())
+
         node.get_left().set_parent(node.get_parent())
+        temp = node.get_left().get_right()
         node.set_parent(node.get_left())
         node.left = AVLNode(None, None)
-        temp = node.get_parent().get_right()
         node.get_parent().set_right(node)
         node.set_left(temp)
         temp=None
