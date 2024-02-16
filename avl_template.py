@@ -235,8 +235,9 @@ class AVLTree(object):
             parent.set_left(leaf)
 
         # if the new node is the root's son, no need for height correction or rotations
+        # BUG !!!! insert [2,1,3] bug in heights - FIXED row 240
         if parent.get_key() == self.root.get_key():
-            parent.set_height(parent.get_height() + 1)
+            parent.set_height(max(parent.get_left().get_height(), parent.get_left().get_height()) + 1)
             return rotations
 
         current_height = 1
