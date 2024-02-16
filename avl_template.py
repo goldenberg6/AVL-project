@@ -152,7 +152,9 @@ class AVLNode(object):
         leaf = AVLNode(key, value)
         leaf.set_parent(parent)
         leaf.set_right(AVLNode(None, None))
+        leaf.get_right().set_parent(leaf)
         leaf.set_left(AVLNode(None, None))
+        leaf.get_left().set_parent(leaf)
         leaf.set_height(0)
         return leaf
 
