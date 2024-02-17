@@ -274,17 +274,17 @@ class AVLTree(object):
                 self.LR_rotate(grand)
                 return 2
             if prev_bf == 1 or prev_bf == 0:
-                self.RR_rotate(grand)
-                return 1
+                heights_changed_flag = self.RR_rotate(grand)
+                return 1, heights_changed_flag
         if grand_bf == -2:
             if prev_bf == 1:
                 self.RL_rotate(grand)
                 return 2
             if prev_bf == -1 or prev_bf == 0:
-                self.LL_rotate(grand)
-                return 1
+                heights_changed_flag = self.LL_rotate(grand)
+                return 1, heights_changed_flag
 
-        return node_to_update
+        # return node_to_update
 
     def update(self, node: AVLNode):
         print("UPDATE")
@@ -330,10 +330,13 @@ class AVLTree(object):
             sentinel.set_right(AVLNode(None, None))
 
         # the only height that changes is node.left's
-        node.set_height(node.get_parent().get_height() - 1)
+        # node.set_height(node.get_parent().get_height() - 1)
 
+        self.update_height_locally(node)
         self.update(node.get_parent().get_parent())
-        return node.get_parent()
+        height_changed = node.calc_bf() != node.get_parent().calc_bf  # edge case - if the height of the physical node
+        # changed because of a deletion but the new height is coincidentally the height of the replacing node
+        return height_changed
 
     def RL_rotate(self, node: AVLNode):
         print("RL_ROTATE")
@@ -386,20 +389,17 @@ class AVLTree(object):
         node.left = AVLNode(None, None)
         node.get_parent().set_right(node)
         node.set_left(temp)
-        temp = None
 
         if is_root:  # is root
             self.root = sentinel.get_left()
             self.root.set_parent(None)
             sentinel.set_left(AVLNode(None, None))
 
-        # the only height that changes is node.left's
-        # self.update_height_locally(node)
-        # node.set_height(node.get_parent().get_height() - 1)
-
         self.update_height_locally(node)
         self.update(node.get_parent())  # .get_parent()
-        return node.get_parent()
+        height_changed = node.calc_bf() != node.get_parent().calc_bf  # edge case - if the height of the physical node
+        # changed because of a deletion but the new height is coincidentally the height of the replacing node
+        return height_changed
 
     def update_height_locally(self, node: AVLNode):
         node.set_height(max(node.get_left().get_height(), node.get_right().get_height()) + 1)
@@ -439,19 +439,13 @@ class AVLTree(object):
     """
 
     def delete(self, node: AVLNode):
-        sentinel = AVLNode(None, None)
-        is_root = False
-        if node.get_parent() is None:  # if node is to be deleted, create sentinel
-            is_root = True
-            sentinel.set_right(node)
-            sentinel.set_left(AVLNode(None, None))
-            node.set_parent(sentinel)
         pdp: AVLNode = self.BST_delete(node)  # pdp stands for Physically Deleted Parent
         rotations = 0
         current_height = max(pdp.get_left().get_height(), pdp.get_right().get_height()) + 1
+        height_changed_flag = False
         while pdp:
             pdp_bf = pdp.calc_bf()
-            height_changed = pdp.height != current_height
+            height_changed = pdp.height != current_height or height_changed_flag
             if abs(pdp_bf) < 2 and not height_changed:  # 3.2
                 break
             elif abs(pdp_bf) < 2 and height_changed:  # 3.3
@@ -461,30 +455,43 @@ class AVLTree(object):
                 continue
             else:  # (BF=2) 3.4
                 is_left = pdp_bf == 2
-                rotations += self.rotate(pdp, is_left)
+                add_rotations, height_changed_flag = self.rotate(pdp, is_left)
+                rotations += add_rotations
                 pdp = pdp.get_parent()
                 current_height = max(pdp.get_left().get_height(), pdp.get_right().get_height()) + 1
 
     def BST_delete(self, node: AVLNode):
+        sentinel = AVLNode(None, None)
+        is_root = False
+        if node.get_parent() is None:  # if node is to be deleted, create sentinel
+            is_root = True
+            sentinel.set_right(node)
+            sentinel.set_left(AVLNode(None, None))
+            node.set_parent(sentinel)
         if self.get_size() == 1:  # is only node
             self.root = None
             return None
-        elif self.get_size() <= 3 and node == self.root:
-            if not node.get_left().is_real_node():
+        elif self.get_size() <= 3 and node == self.root:  # tree has 2 or 3 nodes
+            if not node.get_left().is_real_node():  # root and right node
                 self.root = node.get_right()
                 self.root.set_parent(None)
-            elif not node.get_right().is_real_node():
+            elif not node.get_right().is_real_node():  # root and left node
                 self.root = node.get_left()
                 self.root.set_parent(None)
-            else:
+            else:  # root and left and right
                 temp = node.get_left()
                 self.root = node.get_right()
-                self.root.set_parent(None)
+                self.root.set_parent(None)  # to sentinel HERE
                 self.root.set_left(temp)
                 temp.set_parent(self.root)
+            if is_root:  # remove sentinel if needed
+                self.root = sentinel.get_right()
+                self.root.set_parent(None)
+                sentinel.set_right(AVLNode(None, None))
             return None
 
-        is_left_child = node.get_key() < node.get_parent().get_key() if node.get_parent() is not None else False
+        is_left_child = node.get_key() < node.get_parent().get_key() if (node.get_parent() is not None and
+                                                                         node.get_parent().is_real_node()) else False
         virtual_node = AVLNode(None, None)
         temp = node.get_parent()
         if not node.get_right().is_real_node() and not node.get_left().is_real_node():  # is leaf
@@ -521,9 +528,13 @@ class AVLTree(object):
                 successor.set_right(node.get_right())
             successor.get_left().set_parent(successor)
             successor.get_right().set_parent(successor)
-            # TODO Sentinanl
             node.get_parent().set_left(successor) if is_left_child else node.get_parent().set_right(successor)
             node.set_parent(None)
+
+        if is_root:  # remove sentinel if needed
+            self.root = sentinel.get_right()
+            self.root.set_parent(None)
+            sentinel.set_right(AVLNode(None, None))
 
         return successor_parent
 
