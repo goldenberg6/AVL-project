@@ -16,31 +16,44 @@ bigtree_with_LR2 = [15, 10, 25, 4, 11, 20, 26, 2, 18, 23, 27, 17, 22, 24, 21]
 
 test = [7,2,8,1,5,10,6,9,4]
 
-# t1 = AVLTree()
-# for x in bigtree_with_RR:
-#     t1.insert(x, 0)
-# printree(t1.root)
-
+test2 = [10,6,20,4,8,15,40,2,5,11,30,43,25,35]
 
 t1 = AVLTree()
+for x in bigtree_with_LR:
+    t1.insert(x, 0)
+printree(t1.root)
 
-for x in [2,1,3]:
-    # print("ROTATIONS:   ", t.insert(x,0))
-    t1.insert(x,0)
-    # printree(t.root)
-print("T1--------")
+t1.delete(t1.search(18))
+printree(t1.root)
+
+t1.delete(t1.search(15))
 printree(t1.root)
 
 
-t2 = AVLTree()
-for x in [20,10,30,8,16,25,33,6,9,13,18,27,32,5,7]:
-    # print("ROTATIONS:   ", t.insert(x,0))
-    t2.insert(x,0)
-print("T2--------")
-printree(t2.root)
 
-print("HEIGHT DIFF: ", t1.join(t2, 4,0))
-printree(t1.root)
+
+
+
+
+# t1 = AVLTree()
+
+# for x in [2,1,3]:
+#     # print("ROTATIONS:   ", t.insert(x,0))
+#     t1.insert(x,0)
+#     # printree(t.root)
+# print("T1--------")
+# printree(t1.root)
+#
+#
+# t2 = AVLTree()
+# for x in [20,10,30,8,16,25,33,6,9,13,18,27,32,5,7]:
+#     # print("ROTATIONS:   ", t.insert(x,0))
+#     t2.insert(x,0)
+# print("T2--------")
+# printree(t2.root)
+#
+# print("HEIGHT DIFF: ", t1.join(t2, 4,0))
+# printree(t1.root)
 
 
 
