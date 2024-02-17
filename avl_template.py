@@ -441,6 +441,8 @@ class AVLTree(object):
     def delete(self, node: AVLNode):
         pdp: AVLNode = self.BST_delete(node)  # pdp stands for Physically Deleted Parent
         rotations = 0
+        if pdp is None:  # physically deleted node was root
+            return
         current_height = max(pdp.get_left().get_height(), pdp.get_right().get_height()) + 1
         height_changed_flag = False
         while pdp:
@@ -461,17 +463,10 @@ class AVLTree(object):
                 current_height = max(pdp.get_left().get_height(), pdp.get_right().get_height()) + 1
 
     def BST_delete(self, node: AVLNode):
-        sentinel = AVLNode(None, None)
-        is_root = False
-        if node.get_parent() is None:  # if node is to be deleted, create sentinel
-            is_root = True
-            sentinel.set_right(node)
-            sentinel.set_left(AVLNode(None, None))
-            node.set_parent(sentinel)
         if self.get_size() == 1:  # is only node
             self.root = None
             return None
-        elif self.get_size() <= 3 and node == self.root:  # tree has 2 or 3 nodes
+        elif self.get_size() <= 3 and node == self.root:  # tree has 2 or 3 nodes and delete root
             if not node.get_left().is_real_node():  # root and right node
                 self.root = node.get_right()
                 self.root.set_parent(None)
@@ -484,11 +479,15 @@ class AVLTree(object):
                 self.root.set_parent(None)  # to sentinel HERE
                 self.root.set_left(temp)
                 temp.set_parent(self.root)
-            if is_root:  # remove sentinel if needed
-                self.root = sentinel.get_right()
-                self.root.set_parent(None)
-                sentinel.set_right(AVLNode(None, None))
             return None
+
+        sentinel = AVLNode(None, None)
+        is_root = False
+        if node.get_parent() is None:  # if node is to be deleted, create sentinel
+            is_root = True
+            sentinel.set_right(node)
+            sentinel.set_left(AVLNode(None, None))
+            node.set_parent(sentinel)
 
         is_left_child = node.get_key() < node.get_parent().get_key() if (node.get_parent() is not None and
                                                                          node.get_parent().is_real_node()) else False
