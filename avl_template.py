@@ -24,6 +24,12 @@ class AVLNode(object):
         self.parent = None
         self.height = -1
 
+        # TODO delete this?
+        # virtual nodes
+        if key and value:
+            self.left = AVLNode(None, None)
+            self.right = AVLNode(None, None)
+
     """returns the left child
     @rtype: AVLNode
     @returns: the left child of self, None if there is no left child (if self is virtual)
@@ -158,6 +164,12 @@ class AVLNode(object):
         leaf.set_height(0)
         return leaf
 
+    def create_subtree(self):
+        tree = AVLTree()
+        tree.root = self
+        self.parent = None
+        return tree
+
 
 """
 A class implementing the ADT Dictionary, using an AVL tree.
@@ -181,6 +193,9 @@ class AVLTree(object):
 
     def set_size(self, x):
         self.size = x
+
+    def set_root(self, node: AVLNode):
+        self.root = node
 
     """searches for a value in the dictionary corresponding to the key
 
@@ -216,9 +231,10 @@ class AVLTree(object):
         self.size += 1
         rotations = 0
         # if tree is empty - insert new sentinel node as root (#1)
-        if self.root is None:
+        if self.root is None or not self.root.is_real_node():
             self.root = AVLNode.create_leaf(key, val, None)
             self.root.set_height(0)
+            # rotations += 1 TODO ask in forum
             return rotations
 
         # insert according to BST characteristics (#1)
@@ -238,6 +254,7 @@ class AVLTree(object):
 
         if parent.get_key() == self.root.get_key():
             parent.set_height(max(parent.get_left().get_height(), parent.get_right().get_height()) + 1)
+            rotations += 1
             return rotations
 
         current_height = 1
@@ -439,19 +456,22 @@ class AVLTree(object):
     """
 
     def delete(self, node: AVLNode):
+        if node is None:
+            return 0
         pdp: AVLNode = self.BST_delete(node)  # pdp stands for Physically Deleted Parent
         rotations = 0
         if pdp is None:  # physically deleted node was root
-            return
+            return rotations
         current_height = max(pdp.get_left().get_height(), pdp.get_right().get_height()) + 1
         height_changed_flag = False
         while pdp:
             pdp_bf = pdp.calc_bf()
             height_changed = pdp.height != current_height or height_changed_flag
             if abs(pdp_bf) < 2 and not height_changed:  # 3.2
-                break
+                return rotations
             elif abs(pdp_bf) < 2 and height_changed:  # 3.3
                 pdp.set_height(current_height)
+                rotations += 1  # height change that isnt caused by a rotation
                 pdp = pdp.get_parent()
                 current_height += 1
                 continue
@@ -461,6 +481,7 @@ class AVLTree(object):
                 rotations += add_rotations
                 pdp = pdp.get_parent()
                 current_height = max(pdp.get_left().get_height(), pdp.get_right().get_height()) + 1
+        return rotations
 
     def BST_delete(self, node: AVLNode):
         if self.get_size() == 1:  # is only node
@@ -535,16 +556,16 @@ class AVLTree(object):
             self.root.set_parent(None)
             sentinel.set_right(AVLNode(None, None))
 
-        return successor_parent
+        return successor_parent if not adjacent_successor else successor
 
     def successor(self, node: AVLNode):
         if node.get_right().is_real_node():
             return self.min_node(node.get_right())
-        parent: AVLNode = node.get_parent()
-        while parent.is_real_node() and node == parent.get_right():
-            node = parent
-            parent = parent.get_parent()
-        return parent
+        current: AVLNode = node.get_parent()
+        while current.is_real_node() and node == current.get_right():
+            node = current
+            current = current.get_parent()
+        return current
 
     def min_node(self, node: AVLNode):
         while node.get_left().is_real_node():
@@ -588,8 +609,19 @@ class AVLTree(object):
     dictionary larger than node.key.
     """
 
+    # size field doesn't have to be correct after split()
     def split(self, node):
-        return None
+        t1 = node.left.create_subtree()
+        t2 = node.right.create_subtree()
+        while node.parent is not None:
+            parent = node.parent
+            if parent.key < node.key:
+                t1.join(parent.left.create_subtree(), parent.key, parent.value)
+            else:
+                t2.join(parent.right.create_subtree(), parent.key, parent.value)
+            node = parent
+
+        return [t1, t2]
 
     """joins self with key and another AVLTree
 
@@ -605,40 +637,85 @@ class AVLTree(object):
     """
 
     def join(self, tree2, key, val):
-        height_diff = tree2.get_root().get_height() - self.get_root().get_height() + 1
-        tree2: AVLTree = tree2
-        x = AVLNode(key, val)  # t1 < x < t2
-        x.set_right(AVLNode(None, None))
+        # if tree is empty
+        if (self.root is None or not self.root.is_real_node()) and (
+                tree2.get_root() is None or not tree2.get_root().is_real_node()):
+            height_diff = 1
+            self.insert(key, val)
+        # if self tree is empty
+        elif self.root is None or not self.root.is_real_node():
+            height_diff = tree2.get_root().get_height() + 2  # because other tree height is -1
+            tree2.insert(key, val)
+            self.root = tree2.get_root()
+        # if tree2 is empty
+        elif tree2.get_root() is None or not tree2.get_root().is_real_node():
+            height_diff = self.get_root().get_height() + 2
+            self.insert(key, val)
+        else:  # both trees are not empty
+            # determine which tree is bigger (t2) and smaller (t1)
+            if self.root.key > key:
+                t1 = tree2
+                t2 = self
+            else:
+                t1 = self
+                t2 = tree2
+            height_diff = abs(t1.get_root().get_height() - t2.get_root().get_height()) + 1
 
-        x.set_left(self.root)
-        self.root.set_parent(x)
-        self.update_height_locally(x)
+            if height_diff <= 1:  # join the trees as is (with new node as root)
+                new_node = self.connect_nodes(t1.get_root(), t2.get_root(), key, val)
+                self.root = new_node
 
-        # find left subtree of height h or h-1 (h - height of self) and the height difference between self and tree2
-        current = tree2.get_root()
-        while current.get_height() > self.get_root().get_height():
-            current = current.get_left()
-        x.set_right(current)
-        temp = current.get_parent()
-        current.set_parent(x)
-        x.set_parent(temp)
-        temp.set_left(x)
-
-        # rebalance from x.parent to node ( #nodes in path <= log(n) )
-        current = x.parent
-        while current.get_parent():
-            self.update_height_locally(current)
-            self.rotate(current, True)
-            current = current.get_parent()
-            self.update_height_locally(current)
-
-        self.root = current  # delete
-        self.set_size(self.get_size() + tree2.get_size())
-
+            elif t1.root.get_height() > t2.get_root().get_height():  # join if left is taller (t1)
+                current = t1.get_root()
+                # search for subtree with same height as t2
+                while current.get_height() > t2.root.get_height():
+                    current = current.get_right()
+                prev = current.get_parent()
+                # create x (from presentation) and connect it to the trees
+                node = self.connect_nodes(current, t2.get_root(), key, val)
+                self.update_height_locally(node)
+                node.set_parent(prev)
+                prev.set_right(node)
+                # rebalance from x.parent to node ( #nodes in path <= log(n) )
+                current = node.parent
+                while current.get_parent():
+                    # self.update_height_locally(current)
+                    self.rotate(current, True)
+                    current = current.get_parent()
+                    self.update_height_locally(current)
+                self.root = t1.get_root()
+            else:  # join if right is taller (t2)
+                current = t2.get_root()
+                # search for subtree with same height as t1
+                while current.get_height() > t1.root.get_height():
+                    current = current.get_left()
+                prev = current.get_parent()
+                # create x (from presentation) and connect it to the trees
+                node = self.connect_nodes(t1.get_root(), current, key, val)
+                # self.update_height_locally(node)
+                node.set_parent(prev)
+                prev.set_left(node)
+                # rebalance from x.parent to node ( #nodes in path <= log(n) )
+                current = node.parent
+                while current.get_parent():
+                    # self.update_height_locally(current)
+                    self.rotate(current, True)  # false???
+                    current = current.get_parent()
+                    self.update_height_locally(current)
+                self.root = t2.get_root()
         return height_diff
 
-    """returns the root of the tree representing the dictionary
+    def connect_nodes(self, left, right, key, val):
+        node = AVLNode(key, val)
+        node.set_left(left)
+        node.set_right(right)
+        left.set_parent(node)
+        right.set_parent(node)
+        self.update_height_locally(node)
+        return node
 
+    """returns the root of the tree representing the dictionary
+    
     @rtype: AVLNode
     @returns: the root, None if the dictionary is empty
     """
