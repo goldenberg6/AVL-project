@@ -1,9 +1,8 @@
-# username - complete info
-# id1      - complete info
-# name1    - complete info
-# id2      - complete info
-# name2    - complete info
-from printree import printree
+# username - goldenberg6
+# id1      - 322658782
+# name1    - Noa Goldenberg
+# id2      - 207919283
+# name2    - Ilana Kolody
 
 """A class represnting a node in an AVL tree"""
 
@@ -24,18 +23,15 @@ class AVLNode(object):
         self.parent = None
         self.height = -1
 
-        # TODO delete this?
-        # virtual nodes
-        if key and value:
-            self.left = AVLNode(None, None)
-            self.right = AVLNode(None, None)
-
     """returns the left child
     @rtype: AVLNode
     @returns: the left child of self, None if there is no left child (if self is virtual)
     """
 
     def get_left(self):
+        """
+        Time Complexity - O(1)
+        """
         if not self.left.is_real_node:
             return None
         return self.left
@@ -47,6 +43,9 @@ class AVLNode(object):
     """
 
     def get_right(self):
+        """
+        Time Complexity - O(1)
+        """
         if not self.right.is_real_node:
             return None
         return self.right
@@ -58,6 +57,9 @@ class AVLNode(object):
     """
 
     def get_parent(self):
+        """
+        Time Complexity - O(1)
+        """
         return self.parent
 
     """returns the key
@@ -67,6 +69,9 @@ class AVLNode(object):
     """
 
     def get_key(self):
+        """
+        Time Complexity - O(1)
+        """
         return self.key
 
     """returns the value
@@ -76,6 +81,9 @@ class AVLNode(object):
     """
 
     def get_value(self):
+        """
+        Time Complexity - O(1)
+        """
         return self.value
 
     """returns the height
@@ -85,6 +93,9 @@ class AVLNode(object):
     """
 
     def get_height(self):
+        """
+        Time Complexity - O(1)
+        """
         return self.height
 
     """sets left child
@@ -94,6 +105,9 @@ class AVLNode(object):
     """
 
     def set_left(self, node):
+        """
+        Time Complexity - O(1)
+        """
         self.left = node
 
     """sets right child
@@ -103,6 +117,9 @@ class AVLNode(object):
     """
 
     def set_right(self, node):
+        """
+        Time Complexity - O(1)
+        """
         self.right = node
 
     """sets parent
@@ -112,6 +129,9 @@ class AVLNode(object):
     """
 
     def set_parent(self, node):
+        """
+        Time Complexity - O(1)
+        """
         self.parent = node
 
     """sets key
@@ -121,6 +141,9 @@ class AVLNode(object):
     """
 
     def set_key(self, key):
+        """
+        Time Complexity - O(1)
+        """
         self.key = key
 
     """sets value
@@ -130,6 +153,9 @@ class AVLNode(object):
     """
 
     def set_value(self, value):
+        """
+        Time Complexity - O(1)
+        """
         self.value = value
 
     """sets the height of the node
@@ -139,6 +165,9 @@ class AVLNode(object):
     """
 
     def set_height(self, h):
+        """
+        Time Complexity - O(1)
+        """
         self.height = h
 
     """returns whether self is not a virtual node 
@@ -148,13 +177,24 @@ class AVLNode(object):
     """
 
     def is_real_node(self):
+        """
+        Time Complexity - O(1)
+        """
         return self.key is not None
 
     def calc_bf(self):
+        """
+        Time Complexity - O(1)
+        """
         return self.left.height - self.right.height
 
     @staticmethod
     def create_leaf(key, value, parent):
+        """
+        Creates and returns a node with the given key and value, and attaches 2 virtual nodes as left and right children,
+        and sets the parent to the given parent.
+        Time Complexity: O(1) - All operations are of O(1)
+        """
         leaf = AVLNode(key, value)
         leaf.set_parent(parent)
         leaf.set_right(AVLNode(None, None))
@@ -165,6 +205,10 @@ class AVLNode(object):
         return leaf
 
     def create_subtree(self):
+        """
+        Create and return a subtree where the root is self
+        Time Complexity: O(1) - All operations are of O(1)
+        """
         tree = AVLTree()
         tree.root = self
         self.parent = None
@@ -189,12 +233,21 @@ class AVLTree(object):
     # add your fields here
 
     def get_size(self):
+        """
+        Time Complexity - O(1)
+        """
         return self.size
 
     def set_size(self, x):
+        """
+        Time Complexity - O(1)
+        """
         self.size = x
 
     def set_root(self, node: AVLNode):
+        """
+        Time Complexity - O(1)
+        """
         self.root = node
 
     """searches for a value in the dictionary corresponding to the key
@@ -206,6 +259,11 @@ class AVLTree(object):
     """
 
     def search(self, key):
+        """
+        Starting from root, if node is bigger than key - go to right subtree, otherwise go to left subtree.
+        Longest path is height of tree (log n in AVL tree)
+        Time complexity : O(logn) when n is the number of nodes in the tree.
+        """
         current = self.root
         while current.is_real_node():
             if key == current.key:
@@ -228,13 +286,18 @@ class AVLTree(object):
     """
 
     def insert(self, key, val):
+        """
+        Starting from root, go down (same as search function) until a virtual node is reached and
+        insert a node with given key, val instead (longest possible path is height of tree - O(logn) )
+        And then, rotate as necessary as seen in class. At most 2 rotations (seen in class). - O(1)
+        Time complexity : O(logn) when n is the number of nodes in the tree.
+        """
         self.size += 1
         rotations = 0
         # if tree is empty - insert new sentinel node as root (#1)
         if self.root is None or not self.root.is_real_node():
             self.root = AVLNode.create_leaf(key, val, None)
             self.root.set_height(0)
-            # rotations += 1 TODO ask in forum
             return rotations
 
         # insert according to BST characteristics (#1)
@@ -262,7 +325,6 @@ class AVLTree(object):
         while parent is not None:  # (#3)
             prev_bf = parent.calc_bf()  # 3.1
             height_changed = parent.height != current_height
-            # prev.height hasnt been changed yet
             if abs(prev_bf) < 2 and not height_changed:  # 3.2
                 break
             elif abs(prev_bf) < 2 and height_changed:  # 3.3
@@ -274,15 +336,15 @@ class AVLTree(object):
             else:  # (BF=2) 3.4
                 is_left = prev_bf == 2
                 rotations = self.rotate(child.get_parent(), is_left)
-                # maintain height on path to leaf
                 break
 
         return rotations
 
     def rotate(self, grand: AVLNode, is_left_child: bool):
-        node_to_update = None
-        # determine which rotate is need (RR/RL/LL/LR) and do it
-        # grand = prev.get_parent()
+        """
+        Determine which rotate is need (RR/RL/LL/LR) and do it
+        Time complexity : O(logn) when n is the number of nodes in the tree.
+        """
         prev = grand.get_left() if is_left_child else grand.get_right()
         prev_bf = prev.calc_bf()
         grand_bf = grand.calc_bf()
@@ -579,15 +641,17 @@ class AVLTree(object):
     """
 
     def avl_to_array(self):
-        array: list = []
-        self.avl_to_array_rec(self.root, array)
-        return array
+        def avl_to_array_rec(node):
+            if node is None:
+                return []
+            if node.key is None:
+                return []
+            left_list = avl_to_array_rec(node.left)
+            right_list = avl_to_array_rec(node.right)
+            return left_list + [(node.key, node.value)] + right_list
 
-    def avl_to_array_rec(self, node: AVLNode, array: list):
-        if node.is_real_node():
-            self.avl_to_array_rec(node.get_left(), array)
-            array.append((node.key, node.value))
-            self.avl_to_array_rec(node.get_right(), array)
+        return avl_to_array_rec(self.root)
+
 
     """returns the number of items in dictionary 
 
