@@ -22,12 +22,15 @@ test3_delete_edge_case = [13, 8, 18, 5, 11, 16, 20, 3, 7, 10, 12, 15, 17, 19, 2,
 test3_symmetric = [-13, -8, -18, -5, -11, -16, -20, -3, -7, -10, -12, -15, -17, -19, -2, -4, -6, -9, -14,
                    -1]  # add 30 in for loop!!
 
+t4 = [2887,2559,6815, 2780]
+
+
 t1 = AVLTree()
-for x in LL:
+for x in t4:
     t1.insert(x, 0)
 printree(t1.root)
 
-t1.delete(t1.search(7))
+t1.delete(t1.search(2559))
 printree(t1.root)
 
 # t1 = AVLTree()

@@ -306,9 +306,9 @@ class AVLTree(object):
         while current.is_real_node():
             parent = current
             if key < current.key:
-                current = current.left
+                current = current.get_left()
             else:
-                current = current.right
+                current = current.get_right()
         leaf = AVLNode.create_leaf(key, val, parent)
         if parent.key < key:
             parent.set_right(leaf)
@@ -475,7 +475,7 @@ class AVLTree(object):
             sentinel.set_left(AVLNode(None, None))
 
         self.update_height_locally(node)
-        self.update(node.get_parent())  # .get_parent()
+        self.update(node.get_parent().get_parent())  # .get_parent()
         height_changed = node.calc_bf() != node.get_parent().calc_bf  # edge case - if the height of the physical node
         # changed because of a deletion but the new height is coincidentally the height of the replacing node
         return height_changed
@@ -559,6 +559,7 @@ class AVLTree(object):
             else:  # root and left and right
                 temp = node.get_left()
                 self.root = node.get_right()
+                self.root.set_height(node.get_height())
                 self.root.set_parent(None)  # to sentinel HERE
                 self.root.set_left(temp)
                 temp.set_parent(self.root)
@@ -588,7 +589,7 @@ class AVLTree(object):
         elif not node.get_left().is_real_node():  # has only right child
             node.get_parent().set_left(node.get_right()) if is_left_child else node.get_parent().set_right(
                 node.get_right())
-            node.get_left().set_parent(node.get_parent())
+            node.get_right().set_parent(node.get_parent())
             return temp
 
         else:  # has 2 children
