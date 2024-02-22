@@ -26,12 +26,14 @@ t4 = [2887,2559,6815, 2780]
 
 
 t1 = AVLTree()
-for x in t4:
+for x in [7,6,8]:
     t1.insert(x, 0)
+t1.delete(t1.search(6))
 printree(t1.root)
 
-t1.delete(t1.search(2559))
-printree(t1.root)
+
+#printree(t1.root)
+
 
 # t1 = AVLTree()
 
