@@ -877,8 +877,13 @@ class AVLTree(object):
             height_diff = self.get_root().get_height() + 2
             self.insert(key, val)
         else:  # both trees are not empty
-            t1 = self
-            t2 = tree2
+            # determine which tree is bigger (t2) and smaller (t1)
+            if self.root.key > key:
+                t1 = tree2
+                t2 = self
+            else:
+                t1 = self
+                t2 = tree2
             height_diff = abs(t1.get_root().get_height() - t2.get_root().get_height())
 
             if height_diff <= 1:  # join the trees as is (with new node as root)
@@ -886,6 +891,7 @@ class AVLTree(object):
                 self.root = new_node
 
             # join if left is taller (t1)
+            # this works
             elif t1.root.get_height() > t2.get_root().get_height():
                 current = t1.get_root()
                 # search for subtree with same height as t2
@@ -894,18 +900,11 @@ class AVLTree(object):
                 prev = current.get_parent()
                 # create node (x from presentation) and connect it to the trees
                 node = self.connect_nodes(current, t2.get_root(), key, val)
-                self.update_height_locally(node)
                 node.set_parent(prev)
                 prev.set_right(node)
                 # rebalance from x.parent to node ( #nodes in path <= log(n) )
-                self.rebalance(node)
-                # current = node.parent
-                # while current.get_parent():
-                #     # self.update_height_locally(current)
-                #     self.rotate(current, True)
-                #     current = current.get_parent()
-                #     self.update_height_locally(current)
-                self.root = t1.get_root()
+                self.rebalance(node.parent)
+                self.root = t1.root
 
             # join if right is taller (t2)
             else:
@@ -916,18 +915,14 @@ class AVLTree(object):
                 prev = current.get_parent()
                 # create x (from presentation) and connect it to the trees
                 node = self.connect_nodes(t1.get_root(), current, key, val)
-                self.update_height_locally(node)
+                # self.update_height_locally(node)
                 node.set_parent(prev)
                 prev.set_left(node)
                 # rebalance from x.parent to node ( #nodes in path <= log(n) )
-                self.rebalance(node)
-                # current = node.parent
-                # while current.get_parent():
-                #     # self.update_height_locally(current)
-                #     self.rotate(current, True)  # false???
-                #     current = current.get_parent()
-                #     self.update_height_locally(current)
-                self.root = t2.get_root()
+                self.root = t2.root
+                self.size = t2.size
+                self.rebalance(node.parent)
+                self.root = t2.root
         return height_diff
 
     def connect_nodes(self, left, right, key, val):
