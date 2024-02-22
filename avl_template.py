@@ -3,7 +3,6 @@
 # name1    - Noa Goldenberg
 # id2      - 207919283
 # name2    - Ilana Kolody
-from printree import printree
 
 """A class represnting a node in an AVL tree"""
 
