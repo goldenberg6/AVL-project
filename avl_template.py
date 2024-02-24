@@ -3,6 +3,7 @@
 # name1    - Noa Goldenberg
 # id2      - 207919283
 # name2    - Ilana Kolody
+# username2 - ilanakolody
 
 """A class represnting a node in an AVL tree"""
 
@@ -228,7 +229,6 @@ class AVLTree(object):
     def __init__(self):
         self.root: AVLNode = None
         self.size: int = 0
-
 
     def get_size(self):
         """
